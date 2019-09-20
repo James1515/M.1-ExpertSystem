@@ -1,0 +1,403 @@
+/*
+                       <M1>Wine
+                      Version 1.2
+            Copyright (c) Teknowledge Inc. 1986
+
+                     March 1, 1986
+
+ This knowledge base is for pedagogical purposes only,
+      it should not be considered 'expert'.
+
+ */
+
+/*
+ The goal of this knowledege base is to find values for
+ the expression 'wine'.
+ */
+
+goal = wine.
+
+/* --------------------- BEST-BODY ------------------------------------- */
+
+/*
+        The following rules use information about the sauce on the meal
+        and the meal's tastiness to find out what 'bodied' wine
+        would best accompany the meal.
+*/
+
+rule-1:  if has-sauce = yes and
+            sauce = spicy
+         then best-body = full.
+
+
+rule-2:  if tastiness = delicate
+         then best-body = light cf 80.
+
+rule-3:  if tastiness = average
+         then best-body = light cf 30 and
+              best-body = medium cf 60 and
+              best-body = full cf 30.
+
+rule-4:  if tastiness = strong
+         then best-body = medium cf 40 and
+              best-body = full cf 80.
+
+rule-5:  if has-sauce = yes and
+            sauce = cream
+         then best-body = medium cf 40 and
+              best-body = full cf 60.
+
+/* ---------------------- BEST-COLOR -------------------------------- */
+
+/*
+        The following rules test the main component of the meal and the
+        meal's sauce to find out whether red or white wines would be best.
+*/
+
+
+rule-6: if main-component = meat and
+           has-veal = no
+        then best-color = red cf 90.
+
+rule-7: if main-component = poultry and
+           has-turkey = no
+        then best-color = white cf 90 and
+             best-color = red cf 30.
+
+rule-8: if main-component = fish
+        then best-color = white.
+
+rule-9: if not(main-component = fish) and
+           has-sauce = yes and
+           sauce = tomato
+        then best-color = red.
+
+rule-10: if main-component = poultry and
+            has-turkey = yes
+         then best-color = red cf 80 and
+              best-color = white cf 50.
+
+rule-11: if      has-sauce = yes and
+                     sauce = cream
+         then best-color = white cf 40
+          and best-color = red   cf -90.
+
+
+/* ------------------------BEST-SWEETNESS ------------------------------ */
+
+/*
+This rule provides information about the best sweetness of wine
+to accompany the meal, if it has a sweet sauce on it.  The rule
+advises that any meal with a sweet sauce will not go well with
+dry wine.
+*/
+
+rule-12: if has-sauce = yes and
+            sauce = sweet
+         then best-sweetness = sweet  cf 90 and
+              best-sweetness = medium cf 40.
+
+
+/* ------------------------ FEATURE --------------------------------- */
+
+/*
+        'Feature' is a special characteristic of the wine.
+*/
+
+multivalued(feature).
+
+rule-13:  if has-sauce = yes and
+             sauce = spicy
+          then feature = spiciness.
+
+/* --------------------- HAS-SAUCE ---------------------------------- */
+
+question(has-sauce) =
+       'Does the meal have a sauce on it?'.
+legalvals(has-sauce) =
+        [yes, no].
+
+/* --------------------- HAS-TURKEY --------------------------------- */
+
+question(has-turkey) =
+       'Does the meal have turkey in it?'.
+legalvals(has-turkey) =
+        [yes, no].
+
+/* --------------------- HAS-VEAL ----------------------------------- */
+
+question(has-veal) =
+       'Does the meal have veal in it?'.
+legalvals(has-veal) =
+        [yes, no].
+
+
+/* ------------------------- MAIN-COMPONENT --------------------------- */
+
+multivalued(main-component).
+
+question(main-component) =
+       'Is the main component of the meal meat, fish or poultry?'.
+
+legalvals(main-component) =
+        [meat, fish, poultry].
+
+/* -------------------------- PREFERRED-BODY ------------------------- */
+
+multivalued(preferred-body).
+
+question(preferred-body) =
+       'Do you generally prefer light, medium or full bodied wines?'.
+legalvals(preferred-body) =
+        [light, medium, full].
+
+/* -------------------------- PREFERRED-COLOR ------------------------ */
+
+multivalued(preferred-color).
+
+question(preferred-color) =
+       'Do you generally prefer red or white wines?'.
+legalvals(preferred-color) =
+        [red, white].
+
+/* -------------------------- PREFERRED-SWEETNESS --------------------- */
+
+multivalued(preferred-sweetness).
+
+question(preferred-sweetness) =
+       'Do you generally prefer dry, medium or sweet wines?'.
+legalvals(preferred-sweetness) =
+        [dry, medium, sweet].
+
+/* ------------------------- RECOMMENDED-BODY -------------------------- */
+
+/*
+        These rules provide information about what 'bodied' wine to
+        actually recommend.
+*/
+
+
+/*
+        If the best body is known, then that is what's recommended:
+*/
+
+rule-14:  if best-body = light
+          then recommended-body = light.
+
+rule-15:  if best-body = medium
+          then recommended-body = medium.
+
+rule-16:  if best-body = full
+          then recommended-body = full.
+
+
+/*
+        If the best body is not known, then the user's preference is
+        recommended:
+*/
+
+rule-17:  if best-body is unknown and
+             preferred-body = light
+          then recommended-body = light.
+
+rule-18:  if best-body is unknown and
+             preferred-body = medium
+          then recommended-body = medium.
+
+rule-19:  if best-body is unknown and
+             preferred-body = full
+          then recommended-body = full.
+
+/*
+        If neither the best body nor the preferred body is known,
+        medium-bodied wines are recommended.
+*/
+
+rule-20: if best-body is unknown and
+            preferred-body is unknown
+         then recommended-body = medium.
+
+/* ------------------------ RECOMMENDED-COLOR ------------------------- */
+
+/*
+        These rules determine what color wine to recommend.
+*/
+
+/*
+        If the best color of wine is known, then that's what's
+        recommended:
+*/
+
+rule-21: if best-color = red
+         then recommended-color = red.
+
+rule-22: if best-color = white
+         then recommended-color = white.
+
+/*
+        If the best color is not known, then the user's preference is
+        recommended:
+*/
+
+rule-23: if best-color is unknown and
+            preferred-color = red
+         then recommended-color = red.
+
+rule-24: if best-color is unknown and
+            preferred-color = white
+         then recommended-color = white.
+
+/*
+        If neither the best color nor the preferred color is known,
+        then the Wine Advisor tries to recommend both red and white wines:
+*/
+
+
+rule-25: if best-color is unknown and
+            preferred-color is unknown
+         then recommended-color = red cf 50 and
+              recommended-color = white cf 50.
+
+/* ------------------------- RECOMMENDED-SWEETNESS ------------------------- */
+
+/*
+        As with the other recommended characteristics, if the best sweetness
+        for the wine is known, then that's what gets recommended:
+*/
+
+rule-26: if best-sweetness = dry
+         then recommended-sweetness = dry.
+
+rule-27: if best-sweetness = medium
+         then recommended-sweetness = medium.
+
+rule-28: if best-sweetness = sweet
+         then recommended-sweetness = sweet.
+
+/*
+        Likewise, if the best sweetness isn't known, then the user's
+        preference is recommended:
+*/
+
+rule-29: if best-sweetness is unknown and
+            preferred-sweetness = dry
+         then recommended-sweetness = dry.
+
+rule-30: if best-sweetness is unknown and
+            preferred-sweetness = medium
+         then recommended-sweetness = medium.
+
+rule-31: if best-sweetness is unknown and
+            preferred-sweetness = sweet
+         then recommended-sweetness = sweet.
+
+/*
+        If neither the best nor the preferred sweetness is known,
+        recommendations are made for a medium-sweet wine.
+*/
+
+rule-32: if best-sweetness is unknown and
+            preferred-sweetness is unknown
+         then recommended-sweetness = medium.
+
+/* ------------------------- SAUCE --------------------------------- */
+
+multivalued(sauce).
+
+question(sauce) =
+       'Is the sauce for the meal spicy, sweet, cream or tomato?'.
+legalvals(sauce) =
+        [spicy, sweet, cream, tomato].
+
+/* -------------------------- TASTINESS ----------------------------- */
+
+multivalued(tastiness).
+
+question(tastiness) =
+       'Is the flavor of the meal delicate, average or strong?'.
+legalvals(tastiness) =
+        [delicate, average, strong].
+
+/* -------------------------- WINE ---------------------------------- */
+
+/*
+        The following rules conclude various wines depending on the
+        recommended characteristics of the wine:
+*/
+
+multivalued(wine).
+
+rule-33: if recommended-color = red and
+            recommended-body = medium and
+            recommended-sweetness = medium
+                  or recommended-sweetness = sweet
+         then wine = gamay.
+
+rule-34: if recommended-color = white and
+            recommended-body = light and
+            recommended-sweetness = dry
+         then wine = chablis.
+
+rule-35: if recommended-color = white and
+            recommended-body = medium and
+            recommended-sweetness = dry
+         then wine = sauvignon-blanc.
+
+rule-36: if recommended-color = white and
+            recommended-body = medium
+                        or recommended-body = full and
+            recommended-sweetness = dry
+                        or recommended-sweetness = medium
+         then wine = chardonnay.
+        
+rule-37: if recommended-color = white and
+            recommended-body = light and
+            recommended-sweetness = dry
+                        or recommended-sweetness = medium
+         then wine = soave.
+        
+rule-38: if recommended-color = white and
+            recommended-body = light
+                        or recommended-body = medium and
+            recommended-sweetness = medium
+                        or recommended-sweetness = sweet
+         then wine = riesling.
+        
+rule-39: if recommended-color = white and
+            recommended-body = full and
+            feature = spiciness
+        then wine = gewuerztraminer.
+        
+rule-40: if recommended-color = white and
+            recommended-body = light and
+            recommended-sweetness = medium
+                        or recommended-sweetness = sweet
+         then wine = chenin-blanc.
+
+rule-41: if recommended-color = red and
+            recommended-body = light
+        then wine = valpolicella.
+
+rule-42: if recommended-color = red and
+            recommended-sweetness = dry
+                        or recommended-sweetness = medium
+         then wine = cabernet-sauvignon and
+              wine = zinfandel.
+
+rule-43: if recommended-color = red and
+            recommended-body = medium and
+            recommended-sweetness = medium
+         then wine =  pinot-noir.
+
+rule-44: if recommended-color = red and
+            recommended-body = full
+         then wine = burgundy.
+
+
+        
+/* -------------------------------------------------------------------- */
+
+
+
+
+
